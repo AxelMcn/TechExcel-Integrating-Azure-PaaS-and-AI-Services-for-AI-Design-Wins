@@ -22,13 +22,29 @@ def create_chat_completion(messages):
     )
     # Create and return a new chat completion request
     return client.chat.completions.create(
-        model=aoai_deployment_name,
-        messages=[
-            {"role": m["role"], "content": m["content"]}
-            for m in messages
-        ],
-        stream=True
-    )
+            model=aoai_deployment_name,
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in messages
+            ],
+            stream=True,
+            extra_body={
+                "data_sources": [
+                    {
+                        "type": "azure_search",
+                        "parameters": {
+                            "endpoint": st.secrets["search"]["endpoint"],
+                            "index_name": st.secrets["search"]["index_name"],
+                            "authentication": {
+                                "type": "api_key",
+                                "key": st.secrets["search"]["key"]
+                            }
+                        }
+                    }
+                ]
+            }
+        )
+
 
 def handle_chat_prompt(prompt):
     """Echo the user's prompt to the chat window.
